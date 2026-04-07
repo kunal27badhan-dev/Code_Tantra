@@ -1,0 +1,13 @@
+node_modules/
+.env
+*.log
+.DS_Store
+.vscode/
+*.zip
+*.bat
+report.*.json
+test-quiz-db.html
+misc/
+Hackthon/
+quiz-wired.backup.html
+error.png

@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IssueQuest — Find Your First Open Source Contribution</title>
+  <meta name="description"
+    content="IssueQuest helps new contributors discover perfectly matched 'good first issues' on GitHub through smart filtering, tags, and language preferences." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    /* ─── RESET & BASE ──────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --navy: #06080f;
+      --deep: #0c0e1a;
+      --surface: #111426;
+      --card: #161a30;
+      --border: rgba(120, 100, 255, 0.18);
+      --violet: #7c4dff;
+      --indigo: #5c6bc0;
+      --blue: #2979ff;
+      --cyan: #00e5ff;
+      --teal: #1de9b6;
+      --pink: #e040fb;
+      --text: #e8eaf6;
+      --muted: #8892b0;
+      --glow-v: rgba(124, 77, 255, 0.35);
+      --glow-c: rgba(0, 229, 255, 0.25);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--navy);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    ::selection {
+      background: var(--violet);
+      color: #fff;
+    }
+
+    /* ─── ANIMATED BACKGROUND ───────────────────────────────── */
+    .bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 20%, rgba(124, 77, 255, 0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at 90% 80%, rgba(0, 229, 255, 0.14) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(29, 233, 182, 0.07) 0%, transparent 60%),
+        var(--navy);
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.55;
+      animation: orb-drift 18s ease-in-out infinite alternate;
+    }
+
+    .orb-1 {
+      width: 520px;
+      height: 520px;
+      top: -180px;
+      left: -120px;
+      background: radial-gradient(circle, #7c4dff 0%, transparent 70%);
+      animation-delay: 0s;
+    }
+
+    .orb-2 {
+      width: 400px;
+      height: 400px;
+      bottom: -100px;
+      right: -80px;
+      background: radial-gradient(circle, #00e5ff 0%, transparent 70%);
+      animation-delay: -6s;
+    }
+
+    .orb-3 {
+      width: 300px;
+      height: 300px;
+      top: 40%;
+      left: 60%;
+      background: radial-gradient(circle, #1de9b6 0%, transparent 70%);
+      animation-delay: -12s;
+      opacity: 0.3;
+    }
+
+    @keyframes orb-drift {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      50% {
+        transform: translate(40px, 30px) scale(1.08);
+      }
+
+      100% {
+        transform: translate(-30px, 50px) scale(0.95);
+      }
+    }
+
+    /* ─── GRID LINES ─────────────────────────────────────────── */
+    .grid-lines {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.045;
+      background-image:
+        linear-gradient(var(--cyan) 1px, transparent 1px),
+        linear-gradient(90deg, var(--cyan) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ─── LAYOUT WRAPPER ────────────────────────────────────── */
+    .relative {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── NAV ───────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      background: rgba(6, 8, 15, 0.75);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+
+    .nav-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, var(--violet), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+
+    .nav-logo .icon-wrap {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--violet), var(--cyan));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      -webkit-text-fill-color: white;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .btn-nav {
+      padding: 0.45rem 1.2rem;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--violet), var(--blue));
+      color: #fff !important;
+      font-weight: 600;
+      font-size: 0.88rem;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .btn-nav:hover {
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
+
+    /* ─── HERO ──────────────────────────────────────────────── */
+    .hero {
+      min-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(124, 77, 255, 0.4);
+      background: rgba(124, 77, 255, 0.12);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #b39ddb;
+      margin-bottom: 2rem;
+      animation: badge-in 0.7s ease both;
+    }
+
+    .hero-badge .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 8px var(--teal);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(0.7);
+      }
+    }
+
+    @keyframes badge-in {
+      from {
+        opacity: 0;
+        transform: translateY(-12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero h1 {
+      font-size: clamp(2.8rem, 7vw, 5.2rem);
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -2px;
+      max-width: 900px;
+      animation: fade-up 0.7s 0.1s ease both;
+    }
+
+    .hero h1 .grad {
+      background: linear-gradient(90deg, #b39ddb 0%, var(--cyan) 50%, var(--teal) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 200% 100%;
+      animation: shimmer 4s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      100% {
+        background-position: 200% 50%;
+      }
+    }
+
+    .hero-sub {
+      font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+      color: var(--muted);
+      max-width: 620px;
+      margin: 1.8rem auto 2.8rem;
+      line-height: 1.7;
+      font-weight: 400;
+      animation: fade-up 0.7s 0.2s ease both;
+    }
+
+    .hero-cta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fade-up 0.7s 0.3s ease both;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.85rem 2.2rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--violet) 0%, var(--blue) 100%);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(124, 77, 255, 0.38);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 40px rgba(124, 77, 255, 0.5);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.85rem 2.2rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(120, 100, 255, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* ─── SEARCH BAR DEMO ───────────────────────────────────── */
+    .search-demo {
+      margin-top: 4rem;
+      width: 100%;
+      max-width: 720px;
+      animation: fade-up 0.7s 0.4s ease both;
+    }
+
+    .search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(124, 77, 255, 0.08), 0 20px 60px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .search-wrap:focus-within {
+      border-color: rgba(124, 77, 255, 0.5);
+      box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.15), 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .search-icon {
+      padding: 0 1rem;
+      color: var(--muted);
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    #hero-search {
+      flex: 1;
+      padding: 1rem 0.5rem;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 1rem;
+      font-family: 'Inter', sans-serif;
+      placeholder-color: var(--muted);
+    }
+
+    #hero-search::placeholder {
+      color: var(--muted);
+    }
+
+    .search-filters {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border-left: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .filter-chip {
+      padding: 0.35rem 0.8rem;
+      border-radius: 8px;
+      background: rgba(124, 77, 255, 0.12);
+      border: 1px solid rgba(124, 77, 255, 0.25);
+      color: #b39ddb;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .filter-chip:hover {
+      background: rgba(124, 77, 255, 0.25);
+      transform: scale(1.04);
+    }
+
+    .filter-chip.active {
+      background: linear-gradient(135deg, rgba(124, 77, 255, 0.4), rgba(41, 121, 255, 0.3));
+      border-color: var(--violet);
+      color: #d1c4e9;
+    }
+
+    /* tag pills under search */
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      justify-content: center;
+    }
+
+    .tag-pill {
+      padding: 0.28rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.77rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .tag-pill:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .tag-js {
+      background: rgba(255, 213, 79, 0.12);
+      border-color: rgba(255, 213, 79, 0.3);
+      color: #ffd54f;
+    }
+
+    .tag-py {
+      background: rgba(100, 181, 246, 0.12);
+      border-color: rgba(100, 181, 246, 0.3);
+      color: #64b5f6;
+    }
+
+    .tag-go {
+      background: rgba(29, 233, 182, 0.12);
+      border-color: rgba(29, 233, 182, 0.3);
+      color: #1de9b6;
+    }
+
+    .tag-rust {
+      background: rgba(255, 121, 97, 0.12);
+      border-color: rgba(255, 121, 97, 0.3);
+      color: #ff7961;
+    }
+
+    .tag-ts {
+      background: rgba(41, 121, 255, 0.12);
+      border-color: rgba(41, 121, 255, 0.3);
+      color: #82b1ff;
+    }
+
+    .tag-doc {
+      background: rgba(224, 64, 251, 0.12);
+      border-color: rgba(224, 64, 251, 0.3);
+      color: #e040fb;
+    }
+
+    @keyframes fade-up {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ─── STATS ROW ─────────────────────────────────────────── */
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 3rem;
+      padding: 3rem 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 2.4rem;
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(90deg, var(--violet), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* ─── SECTION STYLES ────────────────────────────────────── */
+    section {
+      padding: 6rem 2rem;
+    }
+
+    .section-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .section-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.9rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      max-width: 600px;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+      max-width: 540px;
+      margin-top: 1rem;
+    }
+
+    .divider {
+      width: 48px;
+      height: 3px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--violet), var(--cyan));
+      margin: 1.5rem 0;
+    }
+
+    /* ─── PROBLEM → SOLUTION ────────────────────────────────── */
+    .prob-sol-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    @media (max-width: 760px) {
+      .prob-sol-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .prob-card,
+    .sol-card {
+      border-radius: 18px;
+      padding: 2.5rem;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prob-card {
+      background: linear-gradient(135deg, rgba(255, 82, 82, 0.08) 0%, rgba(22, 26, 48, 0.9) 100%);
+    }
+
+    .prob-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #ff5252, #ff6d00);
+    }
+
+    .sol-card {
+      background: linear-gradient(135deg, rgba(29, 233, 182, 0.08) 0%, rgba(22, 26, 48, 0.9) 100%);
+    }
+
+    .sol-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--violet), var(--cyan), var(--teal));
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .card-icon.red {
+      background: rgba(255, 82, 82, 0.15);
+    }
+
+    .card-icon.green {
+      background: rgba(29, 233, 182, 0.15);
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+
+    .card-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .card-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .card-list li .bullet {
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ─── FEATURES GRID ─────────────────────────────────────── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    @media (max-width: 960px) {
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .feat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feat-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(124, 77, 255, 0.07) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .feat-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(124, 77, 255, 0.2);
+      border-color: rgba(124, 77, 255, 0.3);
+    }
+
+    .feat-card:hover::after {
+      opacity: 1;
+    }
+
+    .feat-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: inline-block;
+    }
+
+    .feat-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .feat-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ─── ISSUE CARD MOCKUPS ────────────────────────────────── */
+    .issues-demo {
+      margin-top: 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .issue-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.4rem 1.6rem;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: card-slide-in 0.5s ease both;
+    }
+
+    .issue-card:hover {
+      transform: translateX(6px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .issue-card:nth-child(1) {
+      animation-delay: 0.05s;
+    }
+
+    .issue-card:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .issue-card:nth-child(3) {
+      animation-delay: 0.25s;
+    }
+
+    @keyframes card-slide-in {
+      from {
+        opacity: 0;
+        transform: translateX(-16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .issue-lang-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .lang-js {
+      background: #ffd54f;
+      box-shadow: 0 0 8px #ffd54f88;
+    }
+
+    .lang-py {
+      background: #64b5f6;
+      box-shadow: 0 0 8px #64b5f688;
+    }
+
+    .lang-go {
+      background: #1de9b6;
+      box-shadow: 0 0 8px #1de9b688;
+    }
+
+    .issue-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .issue-repo {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .issue-title {
+      font-size: 0.96rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .issue-tags {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .issue-tag {
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+
+    .tag-gfi {
+      background: rgba(29, 233, 182, 0.12);
+      border-color: rgba(29, 233, 182, 0.3);
+      color: #1de9b6;
+    }
+
+    .tag-bug {
+      background: rgba(255, 82, 82, 0.12);
+      border-color: rgba(255, 82, 82, 0.3);
+      color: #ff5252;
+    }
+
+    .tag-doc2 {
+      background: rgba(224, 64, 251, 0.12);
+      border-color: rgba(224, 64, 251, 0.3);
+      color: #e040fb;
+    }
+
+    .tag-feat {
+      background: rgba(124, 77, 255, 0.12);
+      border-color: rgba(124, 77, 255, 0.3);
+      color: #b39ddb;
+    }
+
+    .tag-cli {
+      background: rgba(255, 167, 38, 0.12);
+      border-color: rgba(255, 167, 38, 0.3);
+      color: #ffa726;
+    }
+
+    .issue-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .issue-stars {
+      color: #ffd54f;
+      font-weight: 600;
+    }
+
+    .save-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .save-btn:hover {
+      color: var(--violet);
+      border-color: var(--violet);
+    }
+
+    /* ─── HOW IT WORKS ──────────────────────────────────────── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-top: 3rem;
+      position: relative;
+    }
+
+    @media (max-width: 760px) {
+      .steps-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .steps-grid::before {
+      content: '';
+      position: absolute;
+      top: 36px;
+      left: 16.67%;
+      right: 16.67%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--violet), var(--cyan));
+      z-index: 0;
+    }
+
+    @media (max-width: 760px) {
+      .steps-grid::before {
+        display: none;
+      }
+    }
+
+    .step-card {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      padding: 1rem;
+    }
+
+    .step-num {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--violet), var(--blue));
+      box-shadow: 0 8px 24px rgba(124, 77, 255, 0.35);
+      color: #fff;
+    }
+
+    .step-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+
+    .step-desc {
+      font-size: 0.87rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ─── FILTER DEMO ────────────────────────────────────────── */
+    .filter-demo-wrap {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 2rem;
+      margin-top: 3rem;
+      align-items: start;
+    }
+
+    @media (max-width: 760px) {
+      .filter-demo-wrap {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .filter-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.6rem;
+    }
+
+    .filter-group {
+      margin-bottom: 1.6rem;
+    }
+
+    .filter-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .filter-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.8rem;
+    }
+
+    .filter-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .f-option {
+      padding: 0.3rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .f-option:hover {
+      color: var(--text);
+      border-color: rgba(124, 77, 255, 0.3);
+    }
+
+    .f-option.selected {
+      background: rgba(124, 77, 255, 0.2);
+      border-color: var(--violet);
+      color: #d1c4e9;
+    }
+
+    .difficulty-bar {
+      margin-top: 0.8rem;
+    }
+
+    .difficulty-track {
+      height: 6px;
+      border-radius: 3px;
+      background: var(--surface);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .difficulty-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--teal), var(--cyan));
+      width: 40%;
+      transition: width 0.5s;
+    }
+
+    .diff-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ─── CTA BANNER ─────────────────────────────────────────── */
+    .cta-banner {
+      margin: 0 auto;
+      max-width: 1180px;
+      border-radius: 24px;
+      padding: 5rem 3rem;
+      background:
+        radial-gradient(ellipse 80% 70% at 20% 50%, rgba(124, 77, 255, 0.28) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 60% at 80% 50%, rgba(0, 229, 255, 0.18) 0%, transparent 60%),
+        var(--card);
+      border: 1px solid rgba(124, 77, 255, 0.22);
+      text-align: center;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-banner::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--violet), var(--cyan), var(--teal));
+    }
+
+    .cta-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 1rem;
+    }
+
+    .cta-sub {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 480px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .cta-btns {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.85rem 2rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    /* ─── FOOTER ─────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 2rem;
+    }
+
+    .footer-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .footer-logo {
+      font-size: 1.1rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--violet), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
+
+    .footer-copy {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    /* ─── SCROLL REVEAL ─────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ─── FLOATING PARTICLES ─────────────────────────────────── */
+    .particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .particle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background: var(--cyan);
+      opacity: 0.4;
+      animation: particle-float linear infinite;
+    }
+
+    @keyframes particle-float {
+      0% {
+        transform: translateY(100vh) scale(0);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.4;
+      }
+
+      90% {
+        opacity: 0.4;
+      }
+
+      100% {
+        transform: translateY(-10vh) scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    /* ─── GLOW CURSOR ────────────────────────────────────────── */
+    #cursor-glow {
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124, 77, 255, 0.1) 0%, transparent 70%);
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      transform: translate(-50%, -50%);
+      transition: left 0.08s ease, top 0.08s ease;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Background Layers -->
+  <div class="bg-canvas"></div>
+  <div class="grid-lines"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="particles" id="particles"></div>
+  <div id="cursor-glow"></div>
+
+  <!-- ──────────────── NAV ──────────────────────────────────── -->
+  <nav class="relative">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo" id="logo-link">
+        <span class="icon-wrap">🔍</span>
+        IssueQuest
+      </a>
+      <ul class="nav-links">
+        <li><a href="#problem">Problem</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="/quiz" class="btn-nav">Take Quiz →</a></li>
+        <li><a href="/issues" class="btn-nav">Explore Issues →</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ──────────────── HERO ─────────────────────────────────── -->
+  <section class="hero relative" id="hero">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Open Source · New Contributors Welcome
+    </div>
+    <h1>
+      Find Your Perfect<br />
+      <span class="grad">First Contribution</span>
+    </h1>
+    <p class="hero-sub">
+      New contributors struggle to find the right issues. IssueQuest uses smart
+      filtering — by language, difficulty, topic & more — to surface the exact
+      issue you need to make your first meaningful open‑source contribution.
+    </p>
+    <div class="hero-cta">
+      <a href="/issues" class="btn-primary" id="cta-explore">
+        🚀 Explore Issues
+      </a>
+      <a href="#how-it-works" class="btn-secondary" id="cta-howto">
+        How It Works ↓
+      </a>
+    </div>
+
+    <!-- Search Demo -->
+    <div class="search-demo">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input id="hero-search" type="text" placeholder="Search repositories, issues, or topics…" autocomplete="off" />
+        <div class="search-filters">
+          <span class="filter-chip active" id="chip-gfi">Good First</span>
+          <span class="filter-chip" id="chip-easy">Easy</span>
+          <span class="filter-chip" id="chip-doc">Docs</span>
+        </div>
+      </div>
+      <div class="tag-row">
+        <span class="tag-pill tag-js" onclick="tagClick(this)">JavaScript</span>
+        <span class="tag-pill tag-py" onclick="tagClick(this)">Python</span>
+        <span class="tag-pill tag-ts" onclick="tagClick(this)">TypeScript</span>
+        <span class="tag-pill tag-go" onclick="tagClick(this)">Go</span>
+        <span class="tag-pill tag-rust" onclick="tagClick(this)">Rust</span>
+        <span class="tag-pill tag-doc" onclick="tagClick(this)">Documentation</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────── STATS ────────────────────────────────── -->
+  <div class="relative">
+    <div class="stats-row">
+      <div class="stat-item reveal">
+        <div class="stat-num" id="stat-issues">0</div>
+        <div class="stat-label">Good First Issues</div>
+      </div>
+      <div class="stat-item reveal">
+        <div class="stat-num" id="stat-repos">0</div>
+        <div class="stat-label">Repositories Indexed</div>
+      </div>
+      <div class="stat-item reveal">
+        <div class="stat-num" id="stat-langs">0</div>
+        <div class="stat-label">Languages Supported</div>
+      </div>
+      <div class="stat-item reveal">
+        <div class="stat-num" id="stat-contributors">0</div>
+        <div class="stat-label">Contributors Helped</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────── PROBLEM → SOLUTION ──────────────────── -->
+  <section id="problem" class="relative">
+    <div class="section-inner">
+      <p class="section-tag reveal">The Problem</p>
+      <h2 class="section-title reveal">Why New Contributors Give Up Before They Start</h2>
+      <div class="divider reveal"></div>
+      <div class="prob-sol-grid">
+        <div class="prob-card reveal">
+          <div class="card-icon red">😤</div>
+          <h3 class="card-title">The Struggle is Real</h3>
+          <ul class="card-list">
+            <li><span class="bullet">❌</span>Thousands of issues with no useful filtering</li>
+            <li><span class="bullet">❌</span>"good-first-issue" label is inconsistently applied</li>
+            <li><span class="bullet">❌</span>Complexity far exceeds beginner skill level</li>
+            <li><span class="bullet">❌</span>Stale issues that are already fixed or abandoned</li>
+            <li><span class="bullet">❌</span>No way to match issues to your language/skill set</li>
+            <li><span class="bullet">❌</span>Overwhelming without context or mentorship signals</li>
+          </ul>
+        </div>
+        <div class="sol-card reveal">
+          <div class="card-icon green">✨</div>
+          <h3 class="card-title">IssueQuest's Solution</h3>
+          <ul class="card-list">
+            <li><span class="bullet">✅</span>Smart multi-dimensional filtering by skill &amp; language</li>
+            <li><span class="bullet">✅</span>Freshness signals — only active, recent issues</li>
+            <li><span class="bullet">✅</span>Community-rated difficulty scores beyond just labels</li>
+            <li><span class="bullet">✅</span>Mentor-available filter to find guided opportunities</li>
+            <li><span class="bullet">✅</span>Save &amp; track issues across multiple sessions</li>
+            <li><span class="bullet">✅</span>AI-matched suggestions based on your profile</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────── FEATURES ─────────────────────────────── -->
+  <section id="features" class="relative">
+    <div class="section-inner">
+      <p class="section-tag reveal">Core Features</p>
+      <h2 class="section-title reveal">Everything You Need to Contribute with Confidence</h2>
+      <div class="divider reveal"></div>
+      <div class="features-grid">
+
+        <div class="feat-card reveal">
+          <span class="feat-icon">🎯</span>
+          <h3 class="feat-title">Smart Filtering</h3>
+          <p class="feat-desc">Filter by language, framework, difficulty, topic, repo size, and activity — not just a
+            single label.</p>
+        </div>
+
+        <div class="feat-card reveal">
+          <span class="feat-icon">🌡️</span>
+          <h3 class="feat-title">Freshness Score</h3>
+          <p class="feat-desc">See only active issues. We surface recency signals, last comment date, and maintainer
+            response time.</p>
+        </div>
+
+        <div class="feat-card reveal">
+          <span class="feat-icon">🧭</span>
+          <h3 class="feat-title">Difficulty Radar</h3>
+          <p class="feat-desc">Community-driven difficulty ratings that go beyond simple labels. Know exactly what
+            you're getting into.</p>
+        </div>
+
+        <div class="feat-card reveal">
+          <span class="feat-icon">🤝</span>
+          <h3 class="feat-title">Mentor Available</h3>
+          <p class="feat-desc">Find issues where maintainers have signalled they will guide new contributors through the
+            process.</p>
+        </div>
+
+        <div class="feat-card reveal">
+          <span class="feat-icon">🔖</span>
+          <h3 class="feat-title">Save &amp; Track</h3>
+          <p class="feat-desc">Bookmark issues, track your progress, and organize your contribution journey across
+            multiple repos.</p>
+        </div>
+
+        <div class="feat-card reveal">
+          <span class="feat-icon">⚡</span>
+          <h3 class="feat-title">Instant Search</h3>
+          <p class="feat-desc">Fuzzy, real-time search across issue titles, body text, labels, and repository metadata
+            simultaneously.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────── LIVE ISSUES DEMO ────────────────────── -->
+  <section id="explore" class="relative">
+    <div class="section-inner">
+      <p class="section-tag reveal">Live Demo</p>
+      <h2 class="section-title reveal">Issues Matched Just for You</h2>
+      <div class="divider reveal"></div>
+      <div class="filter-demo-wrap">
+        <!-- Filter Panel -->
+        <div class="filter-panel reveal">
+          <div class="filter-group">
+            <div class="filter-label">Language</div>
+            <div class="filter-options">
+              <span class="f-option selected" onclick="toggleFilter(this)">JavaScript</span>
+              <span class="f-option" onclick="toggleFilter(this)">Python</span>
+              <span class="f-option" onclick="toggleFilter(this)">TypeScript</span>
+              <span class="f-option" onclick="toggleFilter(this)">Go</span>
+              <span class="f-option" onclick="toggleFilter(this)">Rust</span>
+            </div>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">Label</div>
+            <div class="filter-options">
+              <span class="f-option selected" onclick="toggleFilter(this)">good-first-issue</span>
+              <span class="f-option" onclick="toggleFilter(this)">help wanted</span>
+              <span class="f-option" onclick="toggleFilter(this)">documentation</span>
+              <span class="f-option" onclick="toggleFilter(this)">bug</span>
+            </div>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">Difficulty</div>
+            <div class="difficulty-bar">
+              <div class="difficulty-track">
+                <div class="difficulty-fill" id="diff-fill"></div>
+              </div>
+              <div class="diff-labels"><span>Beginner</span><span>Expert</span></div>
+            </div>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">Freshness</div>
+            <div class="filter-options">
+              <span class="f-option selected" onclick="toggleFilter(this)">Last 7 days</span>
+              <span class="f-option" onclick="toggleFilter(this)">Last month</span>
+              <span class="f-option" onclick="toggleFilter(this)">All time</span>
+            </div>
+          </div>
+        </div>
+        <!-- Issues List -->
+        <div class="issues-demo reveal" id="issues-list">
+          <div class="issue-card">
+            <div class="issue-lang-dot lang-js"></div>
+            <div class="issue-content">
+              <div class="issue-repo">facebook / react</div>
+              <div class="issue-title">Add descriptive ARIA labels to DevTools panel buttons</div>
+              <div class="issue-tags">
+                <span class="issue-tag tag-gfi">good-first-issue</span>
+                <span class="issue-tag tag-doc2">accessibility</span>
+              </div>
+            </div>
+            <div class="issue-meta">
+              <span class="issue-stars">⭐ 218k</span>
+              <span>2 days ago</span>
+              <button class="save-btn" onclick="saveIssue(this)">🔖 Save</button>
+            </div>
+          </div>
+          <div class="issue-card">
+            <div class="issue-lang-dot lang-py"></div>
+            <div class="issue-content">
+              <div class="issue-repo">psf / requests</div>
+              <div class="issue-title">Improve error message when session timeout occurs</div>
+              <div class="issue-tags">
+                <span class="issue-tag tag-gfi">good-first-issue</span>
+                <span class="issue-tag tag-bug">bug</span>
+              </div>
+            </div>
+            <div class="issue-meta">
+              <span class="issue-stars">⭐ 50k</span>
+              <span>5 days ago</span>
+              <button class="save-btn" onclick="saveIssue(this)">🔖 Save</button>
+            </div>
+          </div>
+          <div class="issue-card">
+            <div class="issue-lang-dot lang-go"></div>
+            <div class="issue-content">
+              <div class="issue-repo">go / tools</div>
+              <div class="issue-title">Add --version flag support to gopls CLI</div>
+              <div class="issue-tags">
+                <span class="issue-tag tag-gfi">good-first-issue</span>
+                <span class="issue-tag tag-feat">enhancement</span>
+                <span class="issue-tag tag-cli">CLI</span>
+              </div>
+            </div>
+            <div class="issue-meta">
+              <span class="issue-stars">⭐ 19k</span>
+              <span>1 day ago</span>
+              <button class="save-btn" onclick="saveIssue(this)">🔖 Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────── HOW IT WORKS ─────────────────────────── -->
+  <section id="how-it-works" class="relative">
+    <div class="section-inner">
+      <p class="section-tag reveal">Process</p>
+      <h2 class="section-title reveal">From Zero to Contributor in 3 Steps</h2>
+      <div class="divider reveal"></div>
+      <div class="steps-grid">
+
+        <div class="step-card reveal">
+          <div class="step-num">1</div>
+          <h3 class="step-title">Set Your Profile</h3>
+          <p class="step-desc">Tell us your programming languages, experience level, and the topics you care about.
+            Takes under a minute.</p>
+        </div>
+
+        <div class="step-card reveal">
+          <div class="step-num">2</div>
+          <h3 class="step-title">Browse &amp; Filter</h3>
+          <p class="step-desc">Use our powerful filters to narrow down thousands of issues to exactly the ones that
+            match your skills and interests.</p>
+        </div>
+
+        <div class="step-card reveal">
+          <div class="step-num">3</div>
+          <h3 class="step-title">Contribute &amp; Grow</h3>
+          <p class="step-desc">Pick an issue, open your PR, and track progress. Unlock achievement badges as you grow
+            your open-source footprint.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────── CTA BANNER ───────────────────────────── -->
+  <section class="relative" style="padding: 4rem 2rem 6rem;">
+    <div class="cta-banner reveal">
+      <h2 class="cta-title">Ready to Make Your First Contribution?</h2>
+      <p class="cta-sub">Join thousands of developers who found their first open-source issue through IssueQuest.</p>
+      <div class="cta-btns">
+        <a href="/issues" class="btn-primary" id="cta-bottom-explore">🚀 Start Exploring</a>
+        <a href="https://github.com" target="_blank" rel="noopener" class="btn-ghost" id="cta-github">⭐ Star on
+          GitHub</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────── FOOTER ───────────────────────────────── -->
+  <footer class="relative">
+    <div class="footer-inner">
+      <span class="footer-logo">IssueQuest</span>
+      <nav class="footer-links">
+        <a href="#problem">About</a>
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+      <span class="footer-copy">© 2026 IssueQuest · Built for Open Source 💜</span>
+    </div>
+  </footer>
+
+  <!-- ──────────────── SCRIPTS ───────────────────────────────── -->
+  <script>
+    /* === CURSOR GLOW === */
+    const glow = document.getElementById('cursor-glow');
+    document.addEventListener('mousemove', e => {
+      glow.style.left = e.clientX + 'px';
+      glow.style.top = e.clientY + 'px';
+    });
+
+    /* === FLOATING PARTICLES === */
+    const particleContainer = document.getElementById('particles');
+    const PARTICLE_COUNT = 22;
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.cssText = `
+        left: ${Math.random() * 100}%;
+        width: ${Math.random() < 0.5 ? 2 : 3}px;
+        height: ${Math.random() < 0.5 ? 2 : 3}px;
+        animation-duration: ${14 + Math.random() * 20}s;
+        animation-delay: ${-Math.random() * 20}s;
+        background: ${Math.random() < 0.5 ? 'var(--cyan)' : 'var(--violet)'};
+        opacity: ${0.2 + Math.random() * 0.3};
+      `;
+      particleContainer.appendChild(p);
+    }
+
+    /* === SCROLL REVEAL === */
+    const revealEls = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    revealEls.forEach(el => io.observe(el));
+
+    /* === COUNTER ANIMATION === */
+    const counters = [
+      { id: 'stat-issues', target: 12847, suffix: '+' },
+      { id: 'stat-repos', target: 3200, suffix: '+' },
+      { id: 'stat-langs', target: 48, suffix: '' },
+      { id: 'stat-contributors', target: 9100, suffix: '+' },
+    ];
+    function animCounter(el, target, suffix) {
+      let current = 0;
+      const step = Math.ceil(target / 60);
+      const timer = setInterval(() => {
+        current = Math.min(current + step, target);
+        el.textContent = current.toLocaleString() + suffix;
+        if (current >= target) clearInterval(timer);
+      }, 22);
+    }
+    const statsObserver = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          counters.forEach(c => {
+            animCounter(document.getElementById(c.id), c.target, c.suffix);
+          });
+          statsObserver.disconnect();
+        }
+      });
+    }, { threshold: 0.3 });
+    statsObserver.observe(document.querySelector('.stats-row'));
+
+    /* === FILTER CHIPS (hero) === */
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => chip.classList.toggle('active'));
+    });
+
+    /* === TAG PILLS === */
+    function tagClick(el) {
+      el.style.transform = 'scale(0.9)';
+      document.getElementById('hero-search').value = el.textContent;
+      setTimeout(() => { el.style.transform = ''; }, 180);
+    }
+
+    /* === FILTER OPTIONS (sidebar) === */
+    function toggleFilter(el) {
+      el.classList.toggle('selected');
+      // Animate issues on filter change
+      const list = document.getElementById('issues-list');
+      list.style.opacity = '0.4';
+      list.style.transform = 'translateX(10px)';
+      setTimeout(() => {
+        list.style.transition = 'opacity 0.3s, transform 0.3s';
+        list.style.opacity = '1';
+        list.style.transform = '';
+      }, 350);
+    }
+
+    /* === SAVE BUTTON === */
+    function saveIssue(btn) {
+      const saved = btn.dataset.saved;
+      if (!saved) {
+        btn.textContent = '✅ Saved';
+        btn.style.color = 'var(--teal)';
+        btn.style.borderColor = 'var(--teal)';
+        btn.dataset.saved = '1';
+      } else {
+        btn.textContent = '🔖 Save';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+        delete btn.dataset.saved;
+      }
+    }
+
+    /* === TYPEWRITER PLACEHOLDER === */
+    const phrases = [
+      'Search repositories, issues, or topics…',
+      'Try "React accessibility beginner"…',
+      'Try "Python documentation easy"…',
+      'Try "Go CLI help-wanted"…',
+    ];
+    let pi = 0, ci = 0, deleting = false;
+    const inputEl = document.getElementById('hero-search');
+    function typeWriter() {
+      const phrase = phrases[pi];
+      if (!deleting) {
+        ci++;
+        inputEl.placeholder = phrase.slice(0, ci);
+        if (ci === phrase.length) { deleting = true; setTimeout(typeWriter, 1800); return; }
+      } else {
+        ci--;
+        inputEl.placeholder = phrase.slice(0, ci);
+        if (ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; }
+      }
+      setTimeout(typeWriter, deleting ? 40 : 75);
+    }
+    setTimeout(typeWriter, 1200);
+
+    /* === SMOOTH CHIP ACTIVE STYLES ON HOVER === */
+    document.querySelectorAll('.feat-card').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        card.querySelector('.feat-icon').style.transform = 'scale(1.15) rotate(-5deg)';
+      });
+      card.addEventListener('mouseleave', () => {
+        card.querySelector('.feat-icon').style.transform = '';
+      });
+    });
+    document.querySelectorAll('.feat-icon').forEach(icon => {
+      icon.style.transition = 'transform 0.25s ease';
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,12 @@
+# Railway Deployment Configuration
+# This file tells Railway how to deploy your Node.js app
+
+version: "2"
+build:
+  commands:
+    - npm install
+    - npm run seed
+start:
+  command: npm start
+env:
+  NODE_ENV: production

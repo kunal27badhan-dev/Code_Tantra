@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Results</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh; 
+      padding: 2rem;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #5a67d8, #667eea);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    .score-circle {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 1rem auto;
+      font-size: 3rem;
+      font-weight: bold;
+    }
+    .content {
+      padding: 2rem;
+    }
+    .skill-level {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .skill-badge {
+      display: inline-block;
+      padding: 0.5rem 1.5rem;
+      border-radius: 50px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .beginner { background: #fed7d7; color: #c53030; }
+    .intermediate { background: #feebc8; color: #dd6b20; }
+    .advanced { background: #c6f6d5; color: #38a169; }
+    .section {
+      background: #f7fafc;
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+    }
+    .section h3 {
+      color: #2d3748;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .recommendations ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .recommendations li {
+      background: white;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
+      border-left: 4px solid #5a67d8;
+    }
+    .actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+    .btn {
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: transform 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #5a67d8, #667eea);
+      color: white;
+    }
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #4a5568;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .issues-preview {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .issue-item {
+      background: white;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
+      border-left: 4px solid #38a169;
+    }
+    .issue-title { font-weight: 600; color: #2d3748; }
+    .issue-repo { color: #718096; font-size: 0.9rem; }
+    #loading { text-align: center; color: #5a67d8; padding: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎉 Quiz Complete!</h1>
+      <div class="score-circle" id="scoreCircle">-</div>
+      <p id="scoreText">-</p>
+    </div>
+
+    <div class="content">
+      <div class="skill-level">
+        <div class="skill-badge" id="skillBadge">-</div>
+      </div>
+
+      <div class="section recommendations">
+        <h3>💡 Recommendations</h3>
+        <p id="recommendationsFocus">-</p>
+        <ul id="recommendationsList"></ul>
+      </div>
+
+      <div class="section">
+        <h3>🐙 Recommended Issues</h3>
+        <div id="loading">Loading GitHub issues...</div>
+        <div id="issuesContainer" class="issues-preview"></div>
+      </div>
+
+      <div class="actions">
+        <a href="/quiz" class="btn btn-secondary">🔄 Take Another Quiz</a>
+        <a href="/issues" class="btn btn-primary">🚀 Explore More Issues</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function loadResults() {
+      const quizData = JSON.parse(localStorage.getItem('quizResults'));
+      const profile = JSON.parse(localStorage.getItem('quizProfile'));
+      
+      if (!quizData) {
+        alert('No quiz results found!');
+        window.location.href = '/quiz';
+        return;
+      }
+      
+      // Display score
+      document.getElementById('scoreCircle').textContent = 
+        `${quizData.score}/${quizData.totalQuestions}`;
+      document.getElementById('scoreText').textContent = 
+        `${quizData.percentage}% - You're ${quizData.skillLevel}!`;
+      
+      // Display skill level
+      const skillBadge = document.getElementById('skillBadge');
+      skillBadge.textContent = quizData.skillLevel;
+      skillBadge.className = `skill-badge ${quizData.skillLevel}`;
+      
+      // Display recommendations
+      if (quizData.recommendations) {
+        document.getElementById('recommendationsFocus').textContent = 
+          quizData.recommendations.focus;
+        
+        const list = document.getElementById('recommendationsList');
+        list.innerHTML = quizData.recommendations.suggestions
+          .map(suggestion => `<li>${suggestion}</li>`)
+          .join('');
+      }
+      
+      // Load GitHub issues
+      if (profile && profile.languages) {
+        await loadGitHubIssues(profile.languages);
+      }
+    }
+    
+    async function loadGitHubIssues(languages) {
+      try {
+        const languagesParam = languages.join(',');
+        const response = await fetch(`/api/github/issues?languages=${languagesParam}`);
+        const data = await response.json();
+        
+        document.getElementById('loading').style.display = 'none';
+        
+        if (data.success && data.issues.length > 0) {
+          const container = document.getElementById('issuesContainer');
+          container.innerHTML = data.issues.slice(0, 5).map(issue => `
+            <div class="issue-item">
+              <div class="issue-title">${issue.title}</div>
+              <div class="issue-repo">${issue.repo} • ${issue.language}</div>
+            </div>
+          `).join('');
+        } else {
+          document.getElementById('issuesContainer').innerHTML = 
+            '<p>No issues found. Try exploring more languages!</p>';
+        }
+        
+      } catch (error) {
+        console.error('Failed to load GitHub issues:', error);
+        document.getElementById('issuesContainer').innerHTML = 
+          '<p>Failed to load issues. Check the Issues page for more options.</p>';
+      }
+    }
+    
+    // Load results on page load
+    loadResults();
+  </script>
+</body>
+</html>

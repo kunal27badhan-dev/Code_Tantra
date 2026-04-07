@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skills Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --c1: #ff6b6b;
+    --c2: #feca57;
+    --c3: #48dbfb;
+    --c4: #ff9ff3;
+    --c5: #54a0ff;
+    --c6: #5f27cd;
+    --bg: #0a0a12;
+    --surface: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    --text: #f0f0ff;
+    --muted: rgba(240,240,255,0.45);
+    --radius: 20px;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+ 
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  html { scroll-behavior: smooth; }
+ 
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+ 
+  /* ── ANIMATED BG ── */
+  .bg-mesh {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 50% at 10% 20%, rgba(95,39,205,.35) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 90% 80%, rgba(255,107,107,.25) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 60% at 50% 50%, rgba(72,219,251,.12) 0%, transparent 60%);
+    animation: meshShift 12s ease-in-out infinite alternate;
+  }
+  @keyframes meshShift {
+    0%   { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(40deg); }
+  }
+ 
+  .noise {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+ 
+  /* ── LAYOUT ── */
+  .page { position: relative; z-index: 2; max-width: 860px; margin: 0 auto; padding: 0 20px 80px; }
+ 
+  /* ── HERO ── */
+  .hero {
+    text-align: center; padding: 90px 0 60px;
+    animation: fadeDown .8s ease both;
+  }
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-30px); } to { opacity:1; transform:translateY(0); } }
+ 
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: .75rem; font-weight: 600; letter-spacing: .15em; text-transform: uppercase;
+    color: var(--muted); border: 1px solid var(--border);
+    padding: 6px 16px; border-radius: 999px;
+    backdrop-filter: blur(10px);
+    background: var(--surface);
+    margin-bottom: 24px;
+  }
+  .hero-eyebrow span { width:6px; height:6px; border-radius:50%; background:var(--c3); display:inline-block; animation:pulse 1.6s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.5)} }
+ 
+  .hero h1 {
+    font-family: var(--font-head);
+    font-size: clamp(2.8rem, 8vw, 5rem);
+    font-weight: 800; line-height: 1.05;
+    background: linear-gradient(135deg, var(--c1), var(--c4), var(--c3), var(--c2));
+    background-size: 300%;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    animation: gradShift 5s ease infinite alternate;
+  }
+  @keyframes gradShift { 0%{background-position:0%} 100%{background-position:100%} }
+ 
+  .hero-sub {
+    margin-top: 16px; font-size: 1.05rem; color: var(--muted); max-width: 460px; margin-inline: auto;
+    line-height: 1.7;
+  }
+ 
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;
+    margin: 40px 0 60px;
+    animation: fadeDown .8s .2s ease both;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: var(--font-head); font-size: 2.5rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--c3), var(--c5));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: .8rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .1em;
+    margin-top: 4px;
+  }
+
+  /* ── QUESTION CARDS ── */
+  .question-card {
+    position: relative; margin-bottom: 32px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 36px; backdrop-filter: blur(20px);
+    animation: fadeDown .6s ease both;
+    transition: transform .3s, box-shadow .3s;
+  }
+  .question-card:hover { transform: translateY(-6px); }
+  .question-card::before {
+    content: ''; position: absolute; inset: 0; border-radius: var(--radius);
+    background: radial-gradient(ellipse 70% 40% at 50% 0%, rgba(255,255,255,.02) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .cat-label {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .12em;
+    padding: 4px 12px; border-radius: 12px;
+    backdrop-filter: blur(10px);
+    margin-bottom: 20px;
+  }
+
+  .card-prog { border-color: rgba(255,107,107,.2); }
+  .card-prog::before { background: radial-gradient(ellipse 80% 60% at 0% 50%, rgba(255,107,107,.06) 0%, transparent 60%); }
+  .card-prog::after  { background: var(--c1); }
+  .card-prog .cat-label { background: rgba(255,107,107,.12); color: var(--c1); }
+
+  .card-web { border-color: rgba(254,202,87,.2); }
+  .card-web::before { background: radial-gradient(ellipse 80% 60% at 0% 50%, rgba(254,202,87,.06) 0%, transparent 60%); }
+  .card-web::after  { background: var(--c2); }
+  .card-web .cat-label { background: rgba(254,202,87,.12); color: var(--c2); }
+
+  .card-fw { border-color: rgba(72,219,251,.2); }
+  .card-fw::before { background: radial-gradient(ellipse 80% 60% at 0% 50%, rgba(72,219,251,.06) 0%, transparent 60%); }
+  .card-fw::after  { background: var(--c3); }
+  .card-fw .cat-label { background: rgba(72,219,251,.12); color: var(--c3); }
+
+  .card-ai { border-color: rgba(255,159,243,.2); }
+  .card-ai::before { background: radial-gradient(ellipse 80% 60% at 0% 50%, rgba(255,159,243,.06) 0%, transparent 60%); }
+  .card-ai::after  { background: var(--c4); }
+  .card-ai .cat-label { background: rgba(255,159,243,.12); color: var(--c4); }
+
+  .card-tools { border-color: rgba(84,160,255,.2); }
+  .card-tools::before { background: radial-gradient(ellipse 80% 60% at 0% 50%, rgba(84,160,255,.06) 0%, transparent 60%); }
+  .card-tools::after  { background: var(--c5); }
+  .card-tools .cat-label { background: rgba(84,160,255,.12); color: var(--c5); }
+
+  .q-number {
+    font-family: var(--font-head); font-size: 3.5rem; font-weight: 800;
+    position: absolute; top: 24px; right: 36px;
+    opacity: .04; line-height: 1; pointer-events: none; user-select: none;
+  }
+
+  .q-text {
+    font-family: var(--font-head); font-size: 1.15rem; font-weight: 700;
+    line-height: 1.45; margin-bottom: 26px; padding-right: 60px;
+  }
+
+  /* ── OPTIONS ── */
+  .options { display: grid; gap: 10px; }
+  .option-btn {
+    width: 100%; text-align: left;
+    padding: 14px 20px;
+    border-radius: 14px;
+    border: 1.5px solid var(--border);
+    background: rgba(255,255,255,.03);
+    color: var(--text); font-family: var(--font-body); font-size: .92rem;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 14px;
+    transition: all .25s ease;
+    position: relative; overflow: hidden;
+  }
+  .option-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(255,255,255,.06), transparent);
+    opacity: 0; transition: opacity .25s;
+  }
+  .option-btn:hover::before { opacity: 1; }
+  .option-btn:hover {
+    border-color: rgba(255,255,255,.2);
+    transform: translateX(4px);
+  }
+  .option-btn:active { transform: translateX(2px) scale(.99); }
+
+  .option-btn.selected {
+    background: rgba(72,219,251,.18);
+    border-color: rgba(72,219,251,.6);
+  }
+  .option-btn.selected .opt-letter {
+    background: #48dbfb;
+    color: #0a0a12;
+    border-color: #48dbfb;
+  }
+
+  .opt-letter {
+    width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-head); font-size: .8rem; font-weight: 700;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+    transition: all .25s;
+  }
+
+  /* answer states */
+  .option-btn.correct {
+    background: rgba(54,211,153,.15);
+    border-color: rgba(54,211,153,.5);
+    transform: none !important;
+  }
+  .option-btn.correct .opt-letter { background: #36d399; color: #000; border-color: #36d399; }
+
+  .option-btn.wrong {
+    background: rgba(248,114,114,.15);
+    border-color: rgba(248,114,114,.5);
+  }
+  .option-btn.wrong .opt-letter { background: #f87272; color: #000; border-color: #f87272; }
+
+  .option-btn.disabled { cursor: default; pointer-events: none; }
+  .option-btn.correct.disabled { animation: correctPop .4s ease; }
+  @keyframes correctPop { 0%{transform:scale(1)} 50%{transform:scale(1.015)} 100%{transform:scale(1)} }
+
+  /* ── FEEDBACK ── */
+  .feedback {
+    margin-top: 16px; padding: 12px 18px; border-radius: 12px;
+    font-size: .88rem; line-height: 1.55;
+    display: none; animation: fadeIn .3s ease;
+  }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+  .feedback.correct { background: rgba(54,211,153,.1); border:1px solid rgba(54,211,153,.25); color: #9efcd3; }
+  .feedback.wrong   { background: rgba(248,114,114,.1); border:1px solid rgba(248,114,114,.25); color: #ffbcbc; }
+  .feedback-icon { font-size: 1rem; margin-right: 6px; }
+
+  /* ── RESULTS ── */
+  #results {
+    text-align: center; padding: 70px 30px;
+    opacity: 0; transform: translateY(40px);
+    transition: all .7s ease;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 32px; backdrop-filter: blur(20px);
+    display: none;
+  }
+  #results.show { opacity:1; transform:none; display:block; }
+
+  .result-ring {
+    width: 140px; height: 140px;
+    border-radius: 50%; margin: 0 auto 28px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .result-ring svg { position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); }
+  .result-ring circle { fill: none; stroke-width: 6; stroke-linecap: round; }
+  .ring-bg { stroke: rgba(255,255,255,.07); }
+  .ring-fill { stroke-dasharray: 377; stroke-dashoffset: 377; transition: stroke-dashoffset 1.2s cubic-bezier(.65,0,.35,1) .3s; }
+
+  .result-num {
+    font-family: var(--font-head); font-size: 2.8rem; font-weight: 800;
+    line-height: 1; color: var(--text);
+  }
+  .result-denom {
+    font-size: 1rem; color: var(--muted); margin-top: -4px;
+  }
+
+  .result-title {
+    font-family: var(--font-head); font-size: 2rem; font-weight: 700;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--c3), var(--c5));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .result-msg {
+    font-size: 1rem; color: var(--muted); margin-bottom: 32px;
+  }
+
+  .result-breakdown {
+    text-align: left; max-width: 400px; margin: 0 auto 32px;
+    font-size: .9rem; line-height: 1.6;
+  }
+
+  .retry-btn {
+    padding: 16px 32px; border-radius: 50px;
+    background: linear-gradient(135deg, var(--c6), var(--c4));
+    color: white; border: none; font-size: 1rem; cursor: pointer;
+    transition: transform .3s;
+    font-family: var(--font-head); font-weight: 600;
+  }
+  .retry-btn:hover { transform: translateY(-2px); }
+
+  /* ── SCROLL UP ── */
+  #scroll-up {
+    position: fixed; bottom: 30px; right: 30px;
+    width: 50px; height: 50px; border-radius: 50%;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(20px); transition: all .3s;
+    opacity: 0; visibility: hidden; z-index: 10;
+  }
+  #scroll-up.show { opacity: 1; visibility: visible; }
+  #scroll-up:hover { transform: translateY(-4px); }
+
+</style>
+</head>
+
+<body>
+<div class="bg-mesh"></div>
+<div class="noise"></div>
+
+<div class="page">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">
+      <span></span>
+      AI-Powered Assessment
+    </div>
+    <h1>Skills Quiz</h1>
+    <p class="hero-sub">Personalized quiz based on your selected domain and languages</p>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num" id="question-count">20</div><div class="stat-label">Questions</div></div>
+    <div class="stat"><div class="stat-num" id="difficulty-count">3</div><div class="stat-label">Levels</div></div>
+    <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Attempts</div></div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading" style="text-align: center; padding: 60px 0; color: var(--c3);">
+    <h2>🚀 Generating Your Quiz...</h2>
+    <p>Creating personalized questions using AI...</p>
+  </div>
+
+  <!-- QUIZ CARDS -->
+  <div id="quiz-container"></div>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <div class="result-ring">
+      <svg viewBox="0 0 120 120"><circle class="ring-bg" cx="60" cy="60" r="54"/><circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="54" stroke="url(#rg)"/><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#48dbfb"/><stop offset="100%" stop-color="#5f27cd"/></linearGradient></defs></svg>
+      <div><div class="result-num" id="r-score">0</div><div class="result-denom" id="r-total">/20</div></div>
+    </div>
+    <div class="result-title" id="r-title">Quiz Complete!</div>
+    <p class="result-msg" id="r-msg">Great job!</p>
+    <div class="result-breakdown" id="r-breakdown"></div>
+    <button class="retry-btn" onclick="retryQuiz()"><i class="fa fa-rotate-right" style="margin-right:8px"></i>Take Another Quiz</button>
+    <br><br>
+    <button class="retry-btn" onclick="viewResults()" style="background: linear-gradient(135deg, var(--c3), var(--c5));"><i class="fa fa-chart-bar" style="margin-right:8px"></i>View Detailed Results</button>
+  </div>
+
+</div><!-- /page -->
+
+<!-- Scroll up -->
+<button id="scroll-up" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <i class="fa fa-arrow-up"></i>
+</button>
+
+<script>
+// ✅ GET DATA FROM INDEX (DOMAIN SELECTION)
+const domain = localStorage.getItem("domain");
+const languages = JSON.parse(localStorage.getItem("languages")) || [];
+
+console.log("Domain:", domain);
+console.log("Languages:", languages);
+
+// ✅ BACKEND-POWERED QUIZ SYSTEM
+let QUESTIONS = [];
+let currentQuestions = [];
+let currentQ = 0;
+let userAnswers = [];
+let quizData = null;
+
+// Initialize quiz with backend data
+async function initializeQuiz() {
+  try {
+    console.log('🚀 Fetching fresh quiz from database...');
+    
+    // ALWAYS fetch fresh quiz from database - no cache
+    localStorage.removeItem('currentQuiz'); // Clear any old cache
+    await generateQuizFromBackend();
+    
+    if (!quizData || !quizData.questions) {
+      throw new Error('No quiz data available');
+    }
+    
+    // Convert backend questions to frontend format
+    QUESTIONS = quizData.questions.map((q, index) => ({
+      id: index + 1,
+      cat: q.difficulty || 'General', 
+      theme: getDifficultyTheme(q.difficulty),
+      icon: 'fa-code',
+      color: getDifficultyColor(q.difficulty),
+      q: q.question,
+      options: q.options,
+      correct: -1, // Hidden from frontend
+      explain: "Answer will be revealed after submission"
+    }));
+    
+    console.log('✅ Quiz initialized with', QUESTIONS.length, 'questions');
+    
+    // Update stats
+    document.getElementById('question-count').textContent = QUESTIONS.length;
+    
+    // Initialize the quiz interface
+    setupQuiz();
+    
+  } catch (error) {
+    console.error('❌ Failed to initialize quiz:', error);
+    // Show error and reload
+    document.getElementById('loading').innerHTML = `
+      <h2 style="color: var(--c1);">⚠️ Failed to Load Quiz</h2>
+      <p>Please try again or select a different domain.</p>
+      <button class="retry-btn" onclick="window.location.href='/quiz'" style="margin-top: 20px;">← Back to Selection</button>
+    `;
+  }
+}
+
+async function generateQuizFromBackend() {
+  try {
+    // Map frontend domain names to backend domain names
+    const domainMap = {
+      "Web Development": "WebDevelopment",
+      "App Development": "AppDevelopment", 
+      "AI & ML": "MachineLearning",
+      "Cybersecurity": "CyberSecurity",
+      "DevOps": "DevOps"
+    };
+    
+    // Map frontend language names to backend language names
+    const languageMap = {
+      "JavaScript": "JavaScript",
+      "TypeScript": "TypeScript",
+      "HTML/CSS": "JavaScript", // fallback to JavaScript
+      "React": "React",
+      "Node.js": "NodeJS",
+      "Java": "Kotlin", // fallback to Kotlin
+      "Kotlin": "Kotlin",
+      "Swift": "Swift",
+      "Flutter": "Flutter",
+      "React Native": "ReactNative",
+      "Python": "Python",
+      "TensorFlow": "TensorFlow",
+      "PyTorch": "Python", // fallback to Python
+      "Scikit-learn": "Python", // fallback to Python
+      "NumPy": "Python" // fallback to Python
+    };
+    
+    const backendDomain = domainMap[domain] || "WebDevelopment";
+    const backendLanguage = languages.length > 0 
+      ? languages.map(l => languageMap[l] || "JavaScript").filter((v, i, a) => a.indexOf(v) === i)[0]
+      : "JavaScript";
+    
+    console.log('🎯 Fetching quiz from DB:', { domain: backendDomain, language: backendLanguage });
+    console.log('📡 API Request:', { domain: backendDomain, language: backendLanguage, count: 20 });
+    
+    const response = await fetch('/api/quiz/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        domain: backendDomain, 
+        language: backendLanguage, 
+        count: 20 
+      })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ API Error Response:', errorText);
+      throw new Error(`API error: ${response.status}`);
+    }
+    
+    quizData = await response.json();
+    
+    console.log('✅ Quiz loaded from DB:', quizData.questions.length, 'questions');
+    console.log('📝 First 3 questions:');
+    quizData.questions.slice(0, 3).forEach((q, i) => {
+      console.log(`   ${i + 1}. ${q.question}`);
+    });
+    console.log('🤖 AI Model:', quizData.aiModel.model, 'by', quizData.aiModel.provider);
+    
+  } catch (error) {
+    console.error('❌ Failed to load quiz from DB:', error);
+    throw error;
+  }
+}
+
+function getDifficultyTheme(difficulty) {
+  switch(difficulty) {
+    case 'easy': return 'card-prog';
+    case 'medium': return 'card-web'; 
+    case 'hard': return 'card-ai';
+    default: return 'card-fw';
+  }
+}
+
+function getDifficultyColor(difficulty) {
+  switch(difficulty) {
+    case 'easy': return 'var(--c2)';    // Yellow
+    case 'medium': return 'var(--c3)';  // Blue
+    case 'hard': return 'var(--c1)';    // Red
+    default: return 'var(--c5)';
+  }
+}
+
+function setupQuiz() {
+  // Hide loading
+  document.getElementById('loading').style.display = 'none';
+  
+  currentQuestions = [...QUESTIONS];
+  userAnswers = new Array(currentQuestions.length).fill(null);
+  
+  // Update hero subtitle with selection info
+  const heroSub = document.querySelector('.hero-sub');
+  if (heroSub) {
+    heroSub.innerHTML = `Personalized for: <b>${domain || 'General'}</b> with <b>${languages.join(', ') || 'JavaScript'}</b>`;
+  }
+  
+  renderQuiz();
+}
+
+function renderQuiz() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = currentQuestions.map((q, i) => `
+    <div class="question-card ${q.theme}" data-index="${i}">
+      <div class="cat-label"><i class="fa ${q.icon}"></i>${q.cat}</div>
+      <div class="q-number">${String(i+1).padStart(2,'0')}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">
+        ${q.options.map((opt,j) => `
+          <button class="option-btn" data-q="${i}" data-opt="${j}">
+            <span class="opt-letter">${String.fromCharCode(65+j)}</span>
+            <span>${opt}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div class="feedback"></div>
+    </div>
+  `).join('');
+
+  // Add click handlers
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.addEventListener('click', handleAnswer);
+  });
+}
+
+function handleAnswer(e) {
+  const qIndex = parseInt(e.currentTarget.dataset.q);
+  const optIndex = parseInt(e.currentTarget.dataset.opt);
+  
+  // Store user answer
+  userAnswers[qIndex] = optIndex;
+  
+  // Visual feedback
+  const card = document.querySelector(`[data-index="${qIndex}"]`);
+  const buttons = card.querySelectorAll('.option-btn');
+  
+  buttons.forEach((btn, i) => {
+    btn.classList.remove('selected');
+    if (i === optIndex) {
+      btn.classList.add('selected');
+    }
+  });
+  
+  console.log(`Question ${qIndex + 1}: Selected option ${optIndex}`);
+  
+  // Check if all questions answered
+  const answered = userAnswers.filter(a => a !== null).length;
+  if (answered === currentQuestions.length) {
+    setTimeout(() => {
+      finishQuiz();
+    }, 800);
+  }
+}
+
+async function finishQuiz() {
+  console.log('📤 Submitting quiz with answers:', userAnswers);
+  
+  if (!quizData || !quizData.quizId) {
+    // Fallback mode - show simple results
+    showFallbackResults();
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/quiz/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        quizId: quizData.quizId,
+        answers: userAnswers
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Submit API error: ${response.status}`);
+    }
+    
+    const results = await response.json();
+    localStorage.setItem('quizResults', JSON.stringify(results));
+    
+    console.log('✅ Quiz results received:', results);
+    showBackendResults(results);
+    
+  } catch (error) {
+    console.error('❌ Quiz submission error:', error);
+    showFallbackResults();
+  }
+}
+
+function showBackendResults(results) {
+  const score = results.score;
+  const total = results.totalQuestions;
+  const percentage = results.percentage;
+  const skillLevel = results.skillLevel;
+  
+  // Update results display
+  document.getElementById('r-score').textContent = score;
+  document.getElementById('r-total').textContent = `/${total}`;
+  
+  let title, message;
+  if (percentage >= 80) {
+    title = "Outstanding! 🎉";
+    message = `You scored ${percentage}% - You're definitely ${skillLevel} level!`;
+  } else if (percentage >= 60) {
+    title = "Great Job! 👏";
+    message = `${percentage}% correct - Solid ${skillLevel} performance!`;
+  } else if (percentage >= 40) {
+    title = "Good Start! 💪"; 
+    message = `${percentage}% - You're on the ${skillLevel} track, keep going!`;
+  } else {
+    title = "Keep Learning! 📚";
+    message = `${percentage}% - Every ${skillLevel} starts somewhere!`;
+  }
+  
+  document.getElementById('r-title').textContent = title;
+  document.getElementById('r-msg').textContent = message;
+  
+  // Show breakdown
+  const breakdown = document.getElementById('r-breakdown');
+  if (results.recommendations) {
+    breakdown.innerHTML = `
+      <div style="text-align:left;">
+        <h4>💡 ${results.recommendations.focus}</h4>
+        <ul style="margin:10px 0; padding-left:20px;">
+          ${results.recommendations.suggestions.slice(0,3).map(s => `<li>${s}</li>`).join('')}
+        </ul>
+      </div>
+    `;
+  }
+  
+  // Animate progress ring
+  const ringFill = document.getElementById('ring-fill');
+  const circumference = 2 * Math.PI * 54;
+  const offset = circumference - (percentage / 100) * circumference;
+  ringFill.style.strokeDashoffset = offset;
+  
+  // Show results section
+  document.getElementById('results').classList.add('show');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
+
+function showFallbackResults() {
+  const answered = userAnswers.filter(a => a !== null).length;
+  const score = Math.floor(answered * 0.7); // Estimate 70% correct
+  const total = currentQuestions.length;
+  
+  document.getElementById('r-score').textContent = score;
+  document.getElementById('r-total').textContent = `/${total}`;
+  document.getElementById('r-title').textContent = "Quiz Complete!";
+  document.getElementById('r-msg').textContent = `You answered ${answered} out of ${total} questions.`;
+  
+  document.getElementById('results').classList.add('show');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
+
+function retryQuiz() {
+  // Clear storage and reload
+  localStorage.removeItem('currentQuiz');
+  localStorage.removeItem('quizResults');
+  window.location.reload();
+}
+
+function viewResults() {
+  // Redirect to detailed results page
+  window.location.href = '/result';
+}
+
+// Show scroll up button
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scroll-up');
+  if (window.scrollY > 500) {
+    btn.classList.add('show');
+  } else {
+    btn.classList.remove('show');
+  }
+});
+
+// Start the quiz when page loads
+window.addEventListener('DOMContentLoaded', initializeQuiz);
+</script>
+
+</body>
+</html>

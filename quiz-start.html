@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quiz - Domain Selection</title>
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  color: white;
+  min-height: 100vh;
+}
+
+section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  background: linear-gradient(90deg, #38bdf8, #22c55e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.card-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 800px;
+}
+
+.card {
+  padding: 25px 35px;
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.1rem;
+}
+
+.card:hover {
+  background: rgba(56, 189, 248, 0.3);
+  border-color: #38bdf8;
+  transform: translateY(-3px);
+}
+
+.selected {
+  background: rgba(34, 197, 94, 0.4) !important;
+  border-color: #22c55e !important;
+}
+
+button {
+  margin-top: 40px;
+  padding: 15px 40px;
+  border: none;
+  background: linear-gradient(90deg, #38bdf8, #22c55e);
+  color: #0f172a;
+  font-weight: bold;
+  font-size: 1.1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+.module-box {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.module {
+  padding: 40px 50px;
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.module:hover {
+  background: rgba(34, 197, 94, 0.4);
+  border-color: #22c55e;
+  transform: translateY(-5px);
+}
+
+.subtitle {
+  color: #94a3b8;
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+}
+</style>
+</head>
+
+<body>
+
+<!-- DOMAIN -->
+<section id="domain">
+  <h1>🎯 Select Your Domain</h1>
+  <p class="subtitle">Choose your area of expertise for personalized questions</p>
+
+  <div class="card-container" id="domains">
+    <div class="card">🔒 Cybersecurity</div>
+    <div class="card">📱 App Development</div>
+    <div class="card">🌐 Web Development</div>
+    <div class="card">🤖 AI & ML</div>
+    <div class="card">⚙️ DevOps</div>
+  </div>
+
+  <button onclick="nextStep()">Next →</button>
+</section>
+
+<!-- LANGUAGE -->
+<section id="languages" style="display:none;">
+  <h1>💻 Select Languages</h1>
+  <p class="subtitle">Pick the programming languages you're familiar with</p>
+
+  <div class="card-container" id="langs"></div>
+
+  <button onclick="goToModules()">Continue →</button>
+</section>
+
+<!-- MODULE -->
+<section id="modules" style="display:none;">
+  <h1>📋 Choose Module</h1>
+  <p class="subtitle">Select how you want to be assessed</p>
+
+  <div class="module-box">
+    <div class="module" onclick="goToQuiz()">📝 Take Quiz<br><small style="color:#94a3b8">AI-Generated MCQs</small></div>
+    <div class="module" onclick="goToEvaluation()">📊 View Results<br><small style="color:#94a3b8">See Previous Scores</small></div>
+  </div>
+</section>
+
+<script>
+let selectedDomain = "";
+let selectedLanguages = [];
+
+// DOMAIN SELECT
+document.querySelectorAll("#domains .card").forEach(card => {
+  card.onclick = () => {
+    document.querySelectorAll("#domains .card").forEach(c => c.classList.remove("selected"));
+    card.classList.add("selected");
+    selectedDomain = card.innerText.replace(/[🔒📱🌐🤖⚙️\s]/g, '').trim();
+  };
+});
+
+// NEXT STEP
+function nextStep(){
+  if(!selectedDomain) {
+    alert("Please select a domain first!");
+    return;
+  }
+
+  if(selectedDomain === "Cybersecurity" || selectedDomain === "DevOps"){
+    showModules();
+    return;
+  }
+
+  document.getElementById("domain").style.display = "none";
+  document.getElementById("languages").style.display = "flex";
+
+  loadLanguages();
+}
+
+// LOAD LANGUAGES
+function loadLanguages(){
+  let langDiv = document.getElementById("langs");
+  langDiv.innerHTML = "";
+
+  let languages = [];
+
+  if(selectedDomain.includes("Web")){
+    languages = ["JavaScript", "TypeScript", "HTML/CSS", "React", "Node.js"];
+  }
+
+  if(selectedDomain.includes("App")){
+    languages = ["Java", "Kotlin", "Swift", "Flutter", "React Native"];
+  }
+
+  if(selectedDomain.includes("AI") || selectedDomain.includes("ML")){
+    languages = ["Python", "TensorFlow", "PyTorch", "Scikit-learn", "NumPy"];
+  }
+
+  languages.forEach(lang => {
+    let div = document.createElement("div");
+    div.className = "card";
+    div.innerText = lang;
+
+    div.onclick = () => {
+      div.classList.toggle("selected");
+
+      if(selectedLanguages.includes(lang)){
+        selectedLanguages = selectedLanguages.filter(l => l !== lang);
+      } else {
+        selectedLanguages.push(lang);
+      }
+    };
+
+    langDiv.appendChild(div);
+  });
+}
+
+// GO MODULE
+function goToModules(){
+  if(selectedLanguages.length === 0) {
+    alert("Please select at least one language!");
+    return;
+  }
+  showModules();
+}
+
+function showModules(){
+  document.getElementById("domain").style.display = "none";
+  document.getElementById("languages").style.display = "none";
+  document.getElementById("modules").style.display = "flex";
+}
+
+// REDIRECT FUNCTIONS
+function goToQuiz(){
+  localStorage.setItem("domain", selectedDomain);
+  localStorage.setItem("languages", JSON.stringify(selectedLanguages));
+  console.log("Starting quiz with:", selectedDomain, selectedLanguages);
+  window.location.href = "/quiz-take";
+}
+
+function goToEvaluation(){
+  localStorage.setItem("domain", selectedDomain);
+  localStorage.setItem("languages", JSON.stringify(selectedLanguages));
+  window.location.href = "/evaluation";
+}
+</script>
+
+</body>
+</html>
+      border-color: #5a67d8;
+      outline: none;
+    }
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.5rem;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      background: #f7fafc;
+      border-radius: 8px;
+    }
+    .btn {
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: transform 0.3s;
+      background: linear-gradient(135deg, #5a67d8, #667eea);
+      color: white;
+      margin-top: 1rem;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .info-box {
+      background: #edf2f7;
+      padding: 1rem;
+      border-radius: 10px;
+      border-left: 4px solid #5a67d8;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎯 Developer Skills Quiz</h1>
+      <p>Test your skills and discover personalized GitHub issues!</p>
+    </div>
+
+    <div class="content">
+      <div class="info-box">
+        <strong>What you'll get:</strong>
+        <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+          <li>20 personalized questions (5 easy + 7 medium + 8 hard)</li>
+          <li>Skill level assessment</li>
+          <li>Customized GitHub issue recommendations</li>
+        </ul>
+      </div>
+
+      <form id="quizForm">
+        <div class="form-group">
+          <label>Programming Languages *</label>
+          <div class="checkbox-grid">
+            <div class="checkbox-item">
+              <input type="checkbox" id="js" name="languages" value="javascript">
+              <label for="js">JavaScript</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="py" name="languages" value="python">
+              <label for="py">Python</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="java" name="languages" value="java">
+              <label for="java">Java</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="cpp" name="languages" value="cpp">
+              <label for="cpp">C++</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="go" name="languages" value="go">
+              <label for="go">Go</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="rust" name="languages" value="rust">
+              <label for="rust">Rust</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Technical Topics *</label>
+          <div class="checkbox-grid">
+            <div class="checkbox-item">
+              <input type="checkbox" id="web" name="topics" value="web development">
+              <label for="web">Web Development</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="api" name="topics" value="APIs">
+              <label for="api">APIs & Backend</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="db" name="topics" value="databases">
+              <label for="db">Databases</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="ml" name="topics" value="machine learning">
+              <label for="ml">Machine Learning</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="devops" name="topics" value="DevOps">
+              <label for="devops">DevOps</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="mobile" name="topics" value="mobile">
+              <label for="mobile">Mobile Development</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Domain Experience *</label>
+          <div class="checkbox-grid">
+            <div class="checkbox-item">
+              <input type="checkbox" id="frontend" name="domains" value="frontend">
+              <label for="frontend">Frontend</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="backend" name="domains" value="backend">
+              <label for="backend">Backend</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="fullstack" name="domains" value="fullstack">
+              <label for="fullstack">Full Stack</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="datascience" name="domains" value="data science">
+              <label for="datascience">Data Science</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="gamedev" name="domains" value="game development">
+              <label for="gamedev">Game Development</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="embedded" name="domains" value="embedded">
+              <label for="embedded">Embedded Systems</label>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn" id="startBtn">
+          🚀 Generate My Quiz
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('quizForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const languages = Array.from(document.querySelectorAll('input[name="languages"]:checked'))
+        .map(cb => cb.value);
+      const topics = Array.from(document.querySelectorAll('input[name="topics"]:checked'))
+        .map(cb => cb.value);
+      const domains = Array.from(document.querySelectorAll('input[name="domains"]:checked'))
+        .map(cb => cb.value);
+      
+      if (!languages.length || !topics.length || !domains.length) {
+        alert('Please select at least one option from each category!');
+        return;
+      }
+      
+      const btn = document.getElementById('startBtn');
+      btn.disabled = true;
+      btn.textContent = '🔄 Generating Quiz...';
+      
+      try {
+        const response = await fetch('/api/quiz/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topics, languages, domains })
+        });
+        
+        const quizData = await response.json();
+        
+        if (response.ok) {
+          // Store quiz data and profile for later use
+          localStorage.setItem('currentQuiz', JSON.stringify(quizData));
+          localStorage.setItem('quizProfile', JSON.stringify({ topics, languages, domains }));
+          
+          // Redirect to quiz taking page
+          window.location.href = '/quiz-take';
+        } else {
+          alert('Error generating quiz: ' + quizData.error);
+          btn.disabled = false;
+          btn.textContent = '🚀 Generate My Quiz';
+        }
+        
+      } catch (error) {
+        console.error('Quiz generation error:', error);
+        alert('Failed to generate quiz. Please try again.');
+        btn.disabled = false;
+        btn.textContent = '🚀 Generate My Quiz';
+      }
+    });
+  </script>
+</body>
+</html>
